@@ -75,16 +75,15 @@ export function AdminForm({ editingProduct }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!file && !editingProduct?.imageUrl) {
-      // Temporarily bypass image requirement for testing
-      // setMessage('Please upload an image.');
-      // return;
+      setMessage('Please upload an image.');
+      return;
     }
     
     setIsSubmitting(true);
-    setMessage('Status: Starting compression (or skipping)...');
+    setMessage('Status: Starting compression...');
     
     try {
-      let imageUrl = editingProduct?.imageUrl || 'https://via.placeholder.com/150';
+      let imageUrl = editingProduct?.imageUrl;
 
       if (file) {
         // Compress
