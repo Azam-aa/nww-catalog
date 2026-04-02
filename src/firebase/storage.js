@@ -1,43 +1,50 @@
 import { storage } from './config';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-
 export async function uploadProductImage(file, category, onProgress) {
   try {
-    console.log("Uploading started");
-    const timestamp = Date.now();
-    const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
-    const path = `products/${category}/${timestamp}_${safeName}`;
-    console.log("Storage path:", path);
+    console.log("Uploading via Cloudinary started...");
     
-    const storageRef = ref(storage, path);
-    const uploadTask = uploadBytesResumable(storageRef, file);
+    // Cloudinary details from env variables
+    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
-    return await new Promise((resolve, reject) => {
-      uploadTask.on(
-        'state_changed',
-        (snapshot) => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          onProgress?.(Math.round(progress));
-        },
-        (error) => {
-          console.error("Upload failed with error:", error);
-          reject(error);
-        },
-        async () => {
-          try {
-            console.log("Upload success");
-            const url = await getDownloadURL(uploadTask.snapshot.ref);
-            console.log("Download URL:", url);
-            resolve(url);
-          } catch (urlError) {
-            console.error("Failed to get download URL:", urlError);
-            reject(urlError);
-          }
-        }
-      );
+    if (!cloudName || !uploadPreset) {
+      throw new Error("Cloudinary configuration is missing in .env file");
+    }
+
+    // Prepare FormData
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', uploadPreset);
+    formData.append('folder', `products/${category}`); // Optional: organizes folders in Cloudinary
+
+    // We can't easily track native XHR progress with standard fetch,
+    // so we'll simulate a jump to 50%, then 100% when fetch completes.
+    onProgress?.(50);
+
+    const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+    
+    const response = await fetch(cloudinaryUrl, {
+      method: 'POST',
+      body: formData,
     });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Cloudinary Error response:", errorData);
+      throw new Error(errorData.error?.message || "Upload to Cloudinary failed");
+    }
+
+    const data = await response.json();
+    onProgress?.(100);
+    
+    console.log("Cloudinary Upload success");
+    console.log("Download URL:", data.secure_url);
+    
+    // Cloudinary returns the direct image URL in 'secure_url'
+    return data.secure_url;
+
   } catch (error) {
-    console.error("Storage Error:", error);
+    console.error("Image Upload Error:", error);
     throw error;
   }
 }
