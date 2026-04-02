@@ -74,6 +74,8 @@ export function AdminForm({ editingProduct }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("Form submit triggered");
+    
     if (!file && !editingProduct?.imageUrl) {
       setMessage('Please upload an image.');
       return;
@@ -126,8 +128,8 @@ export function AdminForm({ editingProduct }) {
       }
       setUploadProgress(0);
     } catch (err) {
-      console.error(err);
-      setMessage('Error: ' + err.message);
+      console.error("Form Submission Error:", err);
+      setMessage('Error: ' + (err.message || 'Unknown error occurred. Check browser console.'));
     } finally {
       setIsSubmitting(false);
     }

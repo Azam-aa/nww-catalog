@@ -27,11 +27,18 @@ export async function getProducts({ category, subCategory, lastDoc = null }) {
 }
 
 export async function addProduct(data) {
-  return addDoc(collection(db, 'products'), {
-    ...data,
-    isActive: true,
-    createdAt: serverTimestamp(),
-  });
+  try {
+    const docRef = await addDoc(collection(db, 'products'), {
+      ...data,
+      isActive: true,
+      createdAt: serverTimestamp(),
+    });
+    console.log("Firestore write success", docRef.id);
+    return docRef;
+  } catch (error) {
+    console.error("Firestore write failed:", error);
+    throw error;
+  }
 }
 
 export async function updateProduct(id, data) {
