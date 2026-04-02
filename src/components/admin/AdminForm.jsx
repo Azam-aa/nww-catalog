@@ -80,7 +80,7 @@ export function AdminForm({ editingProduct }) {
     }
     
     setIsSubmitting(true);
-    setMessage('');
+    setMessage('Status: Starting compression...');
     
     try {
       let imageUrl = editingProduct?.imageUrl;
@@ -93,12 +93,14 @@ export function AdminForm({ editingProduct }) {
         });
         
         // Upload
+        setMessage('Status: Uploading image...');
         imageUrl = await uploadProductImage(compressedFile, formData.category, (prog) => {
           setUploadProgress(prog);
         });
       }
       
       // Save doc
+      setMessage('Status: Saving to database...');
       const margin = (Number(formData.price || 0) - Number(formData.costPrice || 0));
       const docData = {
         ...formData,
