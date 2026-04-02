@@ -75,15 +75,16 @@ export function AdminForm({ editingProduct }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!file && !editingProduct?.imageUrl) {
-      setMessage('Please upload an image.');
-      return;
+      // Temporarily bypass image requirement for testing
+      // setMessage('Please upload an image.');
+      // return;
     }
     
     setIsSubmitting(true);
-    setMessage('Status: Starting compression...');
+    setMessage('Status: Starting compression (or skipping)...');
     
     try {
-      let imageUrl = editingProduct?.imageUrl;
+      let imageUrl = editingProduct?.imageUrl || 'https://via.placeholder.com/150';
 
       if (file) {
         // Compress
@@ -93,14 +94,14 @@ export function AdminForm({ editingProduct }) {
         });
         
         // Upload
-        setMessage('Status: Uploading image...');
+        setMessage('Status: Uploading image to Storage...');
         imageUrl = await uploadProductImage(compressedFile, formData.category, (prog) => {
           setUploadProgress(prog);
         });
       }
       
       // Save doc
-      setMessage('Status: Saving to database...');
+      setMessage('Status: Saving to Firestore Database...');
       const margin = (Number(formData.price || 0) - Number(formData.costPrice || 0));
       const docData = {
         ...formData,
