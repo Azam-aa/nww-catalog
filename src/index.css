@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-body bg-surface-primary dark:bg-dark-primary text-ink-primary dark:text-white transition-colors duration-200;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading text-ink-primary dark:text-white;
+  }
+}
+
+/* Ensure no horizontal scroll everywhere */
+html, body {
+  overflow-x: hidden;
+}
+
+/* Hide scrollbar but keep functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
