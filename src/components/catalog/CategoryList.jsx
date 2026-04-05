@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { CATEGORIES } from '../../data/categories';
+import { useCategories } from '../../context/CategoryContext';
 import { ChevronRight, Archive, Bed, Armchair, Grid } from 'lucide-react';
 
 const iconMap = {
@@ -10,10 +10,23 @@ const iconMap = {
 };
 
 export function CategoryList() {
+  const { categories, loading } = useCategories();
+
+  if (loading) {
+    return (
+      <div className="flex flex-col gap-2 p-4">
+        <h1 className="text-2xl font-heading font-bold text-ink-primary dark:text-white mb-2">Categories</h1>
+        {[1, 2, 3].map(i => (
+          <div key={i} className="w-full h-[80px] bg-surface-primary dark:bg-dark-secondary rounded-xl animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-2 p-4">
       <h1 className="text-2xl font-heading font-bold text-ink-primary dark:text-white mb-2">Categories</h1>
-      {CATEGORIES.map(category => {
+      {categories.map(category => {
         const Icon = iconMap[category.icon] || Grid;
         return (
           <Link
@@ -29,7 +42,7 @@ export function CategoryList() {
                 {category.label}
               </span>
               <span className="text-sm text-ink-secondary dark:text-gray-400 mt-0.5">
-                {category.subCategories.length} types
+                {category.subCategories?.length || 0} types
               </span>
             </div>
             <ChevronRight size={20} className="text-ink-muted dark:text-gray-500" />

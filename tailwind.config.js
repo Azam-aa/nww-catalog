@@ -41,6 +41,15 @@ export default {
         md: '768px',
         lg: '1024px',
       },
+      animation: {
+        'bounce-once': 'bounce-once 0.5s ease-in-out',
+      },
+      keyframes: {
+        'bounce-once': {
+          '0%, 100%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(1.3)' },
+        },
+      },
     },
   },
   plugins: [],

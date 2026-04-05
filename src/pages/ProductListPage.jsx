@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { CATEGORIES } from '../data/categories';
+import { useCategories } from '../context/CategoryContext';
 import { useProducts } from '../hooks/useProducts';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { ProductGrid } from '../components/catalog/ProductGrid';
@@ -13,15 +13,20 @@ import { Badge } from '../components/ui/Badge';
 
 export function ProductListPage() {
   const { cat, sub } = useParams();
-  const { products, loadMore, hasMore, loading, error } = useProducts(cat, sub);
+  const { products, loadMore, hasMore, loading: productsLoading, error } = useProducts(cat, sub);
+  const { categories, loading: categoriesLoading } = useCategories();
   const sentinelRef = useInfiniteScroll(loadMore, hasMore);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
-  const category = CATEGORIES.find(c => c.id === cat);
-  const subCategory = category?.subCategories.find(s => s.id === sub);
+  const category = categories.find(c => c.id === cat);
+  const subCategory = category?.subCategories?.find(s => s.id === sub);
+
+  if (categoriesLoading) {
+    return <div className="pt-[56px] min-h-screen flex justify-center items-center"><Spinner /></div>;
+  }
 
   if (!category || !subCategory) {
-    return <EmptyState message="Subcategory not found" />;
+    return <div className="pt-[56px]"><EmptyState message="Subcategory not found" /></div>;
   }
 
   return (

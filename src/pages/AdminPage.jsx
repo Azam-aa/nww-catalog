@@ -1,17 +1,17 @@
 import { useState } from 'react';
 import { AdminForm } from '../components/admin/AdminForm';
-import { Lock } from 'lucide-react';
-import { useShopMode } from '../context/ShopModeContext';
+import { AdminCategories } from '../components/admin/AdminCategories';
+import { Lock, Package, FolderTree } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 
 export function AdminPage() {
-  const { shopMode } = useShopMode();
   const location = useLocation();
   const editingProduct = location.state?.product || null;
 
-  const [isAuthenticated, setIsAuthenticated] = useState(shopMode);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
+  const [activeTab, setActiveTab] = useState('products');
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -23,8 +23,41 @@ export function AdminPage() {
     }
   };
 
-  if (isAuthenticated || shopMode) {
-    return <div className="pt-[56px]"><AdminForm editingProduct={editingProduct} /></div>;
+  if (isAuthenticated) {
+    return (
+      <div className="pt-[56px] min-h-screen bg-surface-secondary dark:bg-dark-primary">
+        <div className="bg-surface-primary dark:bg-dark-secondary border-b border-surface-border dark:border-dark-border sticky top-[56px] z-30">
+          <div className="flex max-w-3xl mx-auto">
+            <button
+              onClick={() => setActiveTab('products')}
+              className={`flex-1 py-4 text-sm font-bold flex items-center justify-center gap-2 border-b-2 transition-colors ${
+                activeTab === 'products' 
+                  ? 'border-brand-500 text-brand-600 dark:text-brand-400 bg-brand-50/50 dark:bg-brand-900/10' 
+                  : 'border-transparent text-ink-muted dark:text-gray-500 hover:text-ink-primary dark:hover:text-gray-300'
+              }`}
+            >
+              <Package size={18} /> Manage Products
+            </button>
+            <button
+              onClick={() => setActiveTab('categories')}
+              className={`flex-1 py-4 text-sm font-bold flex items-center justify-center gap-2 border-b-2 transition-colors ${
+                activeTab === 'categories' 
+                  ? 'border-brand-500 text-brand-600 dark:text-brand-400 bg-brand-50/50 dark:bg-brand-900/10' 
+                  : 'border-transparent text-ink-muted dark:text-gray-500 hover:text-ink-primary dark:hover:text-gray-300'
+              }`}
+            >
+              <FolderTree size={18} /> Manage Categories
+            </button>
+          </div>
+        </div>
+
+        {activeTab === 'products' ? (
+          <AdminForm editingProduct={editingProduct} />
+        ) : (
+          <AdminCategories />
+        )}
+      </div>
+    );
   }
 
   return (

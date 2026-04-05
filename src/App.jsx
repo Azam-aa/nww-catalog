@@ -5,6 +5,7 @@ import { HomePage } from './pages/HomePage';
 import { CategoryPage } from './pages/CategoryPage';
 import { ProductListPage } from './pages/ProductListPage';
 import { AdminPage } from './pages/AdminPage';
+import { ShareCartPage } from './pages/ShareCartPage';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="/category/:id" element={<CategoryPage />} />
           <Route path="/products/:cat/:sub" element={<ProductListPage />} />
           <Route path="/admin" element={<AdminPage />} />
+          <Route path="/share-cart" element={<ShareCartPage />} />
         </Routes>
       </main>
       <BottomNav />

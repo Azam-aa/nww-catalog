@@ -1,12 +1,18 @@
 import { useState, useRef, useEffect } from 'react';
 import { useShopMode } from '../../context/ShopModeContext';
+import { useShareCart } from '../../context/ShareCartContext';
 import { formatPrice } from '../../utils/formatPrice';
+import { Bookmark, BookmarkCheck, Layers } from 'lucide-react';
 
 export function ProductCard({ product, onClick }) {
   const { shopMode } = useShopMode();
+  const { isInCart, toggleCart } = useShareCart();
   const [isLoaded, setIsLoaded] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const imgRef = useRef();
+
+  const saved = isInCart(product.id);
+  const imageCount = product.imageUrls?.length || 1;
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -21,6 +27,11 @@ export function ProductCard({ product, onClick }) {
     if (imgRef.current) observer.observe(imgRef.current);
     return () => observer.disconnect();
   }, []);
+
+  const handleSave = (e) => {
+    e.stopPropagation();
+    toggleCart(product);
+  };
 
   return (
     <div 
@@ -46,6 +57,27 @@ export function ProductCard({ product, onClick }) {
         />
       )}
 
+      {/* Multi-image indicator */}
+      {imageCount > 1 && (
+        <div className="absolute top-2 left-2 bg-black/60 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md flex items-center gap-1 z-10">
+          <Layers size={10} />
+          {imageCount}
+        </div>
+      )}
+
+      {/* Bookmark button */}
+      <button
+        onClick={handleSave}
+        className="absolute top-2 right-2 p-1.5 rounded-full bg-black/40 hover:bg-black/60 transition-colors z-10 active:scale-90"
+        aria-label={saved ? 'Remove from share list' : 'Save to share list'}
+      >
+        {saved ? (
+          <BookmarkCheck size={16} className="text-brand-400 fill-brand-400" />
+        ) : (
+          <Bookmark size={16} className="text-white/80" />
+        )}
+      </button>
+
       {/* Gradient Overlay */}
       <div className="absolute inset-x-0 bottom-0 top-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none" />
 
@@ -61,7 +93,7 @@ export function ProductCard({ product, onClick }) {
 
       {/* Shop Mode Price Badge */}
       {shopMode && product.price && (
-        <div className="absolute top-2 right-2 bg-brand-500 text-white text-[12px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+        <div className="absolute bottom-2 right-2 bg-brand-500 text-white text-[12px] font-bold px-2 py-0.5 rounded-full shadow-sm z-10">
           {formatPrice(product.price)}
         </div>
       )}

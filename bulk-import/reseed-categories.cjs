@@ -1,7 +1,24 @@
-export const CATEGORIES = [
+const admin = require('firebase-admin');
+const fs = require('fs');
+
+const serviceAccountPath = './service-account-key.json';
+if (!fs.existsSync(serviceAccountPath)) {
+  console.error('Error: service-account-key.json not found in bulk-import/ directory.');
+  process.exit(1);
+}
+
+const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
+const db = admin.firestore();
+
+const CATEGORIES = [
   {
     id: 'almari',
-    label: 'Almirahs',
+    label: 'Almirahs & Storage',
     icon: 'cabinet',
     subCategories: [
       { id: 'sd-lw', label: 'SD Almari (LW)', typeCode: 'salw', weightTypes: [] },
@@ -14,15 +31,18 @@ export const CATEGORIES = [
       { id: 'td-mh', label: 'TD Almari (MH)', typeCode: 'tamh', weightTypes: [] },
       { id: 'td-h', label: 'TD Almari (H)', typeCode: 'tah', weightTypes: [] },
       { id: 'office', label: 'Office Almari', typeCode: 'ofa', weightTypes: [] },
-      { id: 'wall-doors', label: 'Wall Doors', typeCode: 'wd', weightTypes: [] }
+      { id: 'wall-doors', label: 'Wall Doors', typeCode: 'wd', weightTypes: [] },
+      { id: 'trunks', label: 'Trunks', typeCode: 'tr', weightTypes: [] },
+      { id: 'racks', label: 'Racks', typeCode: 'rk', weightTypes: [] },
     ]
   },
   {
     id: 'cots',
-    label: 'Cots',
+    label: 'Cots & Beds',
     icon: 'bed',
     subCategories: [
       { id: 'up-down', label: 'Up & Down Cots', typeCode: 'udc', weightTypes: [] },
+      { id: 'sofa-diwan', label: 'Sofa & Diwan cot', typeCode: 'sdc', weightTypes: [] },
       { id: 'bail-patti', label: 'Bail patti cots', typeCode: 'bpc', weightTypes: [] },
       { id: 'nawar', label: 'Nawar Cots', typeCode: 'nwc', weightTypes: [] },
       { id: 'single-rm', label: 'Single Cots (RM)', typeCode: 'scrm', weightTypes: [] },
@@ -34,78 +54,45 @@ export const CATEGORIES = [
     ]
   },
   {
-    id: 'sofa',
-    label: 'Sofa',
-    icon: 'armchair',
-    subCategories: [
-      { id: 'sofa-diwan', label: 'Sofa & Diwan cot', typeCode: 'sdc', weightTypes: [] }
-    ]
-  },
-  {
-    id: 'dressing-table',
-    label: 'Dressing Table',
-    icon: 'grid',
-    subCategories: [
-      { id: 'dressing-table', label: 'Dressing Table', typeCode: 'dt', weightTypes: [] }
-    ]
-  },
-  {
-    id: 'chairs',
-    label: 'Chairs',
+    id: 'furniture',
+    label: 'Tables & Seating',
     icon: 'armchair',
     subCategories: [
       { id: 'metal-chairs', label: 'Metal chairs', typeCode: 'mc', weightTypes: [] },
       { id: 'study-chairs', label: 'Study Chairs', typeCode: 'sc', weightTypes: [] },
-      { id: 'plastic-chairs', label: 'Plastic Chairs', typeCode: 'pc', weightTypes: [] }
-    ]
-  },
-  {
-    id: 'tables',
-    label: 'Tables',
-    icon: 'grid',
-    subCategories: [
-      { id: 'tables', label: 'Tables', typeCode: 'tb', weightTypes: [] }
-    ]
-  },
-  {
-    id: 'stools-ladders',
-    label: 'Stools & Ladders',
-    icon: 'grid',
-    subCategories: [
+      { id: 'plastic-chairs', label: 'Plastic Chairs', typeCode: 'pc', weightTypes: [] },
       { id: 'plastic-stools', label: 'Plastic Stools', typeCode: 'ps', weightTypes: [] },
-      { id: 'ladders-stools', label: 'Ladders & Stools', typeCode: 'ls', weightTypes: [] }
-    ]
-  },
-  {
-    id: 'racks',
-    label: 'Racks',
-    icon: 'grid',
-    subCategories: [
-      { id: 'racks', label: 'Racks', typeCode: 'rk', weightTypes: [] }
-    ]
-  },
-  {
-    id: 'lockers',
-    label: 'Lockers',
-    icon: 'cabinet',
-    subCategories: [
-      { id: 'lockers', label: 'Lockers', typeCode: 'lk', weightTypes: [] }
-    ]
-  },
-  {
-    id: 'dining-tables',
-    label: 'Dining Tables',
-    icon: 'grid',
-    subCategories: [
-      { id: 'dining-tables', label: 'Dining Tables', typeCode: 'dnt', weightTypes: [] }
-    ]
-  },
-  {
-    id: 'trunks',
-    label: 'Trunks',
-    icon: 'cabinet',
-    subCategories: [
-      { id: 'trunks', label: 'Trunks', typeCode: 'tr', weightTypes: [] }
+      { id: 'ladders-stools', label: 'Ladders & Stools', typeCode: 'ls', weightTypes: [] },
+      { id: 'dressing-tables', label: 'Dressing Tables', typeCode: 'dt', weightTypes: [] },
+      { id: 'dining-tables', label: 'Dining Table', typeCode: 'dnt', weightTypes: [] },
     ]
   }
 ];
+
+async function run() {
+  console.log('Starting category re-seed...');
+  try {
+    const snapshot = await db.collection('categories').get();
+    const batchDelete = db.batch();
+    snapshot.docs.forEach(doc => {
+      batchDelete.delete(doc.ref);
+    });
+    await batchDelete.commit();
+    console.log('Old categories deleted.');
+
+    const batchAdd = db.batch();
+    CATEGORIES.forEach((cat, index) => {
+      const docRef = db.collection('categories').doc(cat.id);
+      batchAdd.set(docRef, { ...cat, order: index });
+    });
+    await batchAdd.commit();
+
+    console.log('Successfully re-seeded categories!');
+    process.exit(0);
+  } catch (err) {
+    console.error('Migration failed:', err);
+    process.exit(1);
+  }
+}
+
+run();

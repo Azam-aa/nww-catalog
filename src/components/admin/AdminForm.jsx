@@ -1,13 +1,20 @@
 import { useState, useMemo } from 'react';
 import imageCompression from 'browser-image-compression';
-import { CATEGORIES } from '../../data/categories';
+import { useCategories } from '../../context/CategoryContext';
 import { uploadProductImage } from '../../firebase/storage';
 import { addProduct, updateProduct } from '../../firebase/products';
-import { Upload, X, CheckCircle, Loader2 } from 'lucide-react';
+import { Upload, X, CheckCircle, Loader2, Plus, Layers } from 'lucide-react';
 
 export function AdminForm({ editingProduct }) {
-  const [file, setFile] = useState(null);
-  const [previewURL, setPreviewURL] = useState(editingProduct?.imageUrl || null);
+  const { categories, loading: categoriesLoading } = useCategories();
+  const [files, setFiles] = useState([]);
+  const [previewURLs, setPreviewURLs] = useState(
+    editingProduct?.imageUrls?.length > 0
+      ? editingProduct.imageUrls
+      : editingProduct?.imageUrl
+        ? [editingProduct.imageUrl]
+        : []
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [message, setMessage] = useState('');
@@ -27,14 +34,18 @@ export function AdminForm({ editingProduct }) {
   });
 
   const selectedCategory = useMemo(() => 
-    CATEGORIES.find(c => c.id === formData.category), 
-  [formData.category]);
+    categories.find(c => c.id === formData.category), 
+  [categories, formData.category]);
 
   const selectedSubCategory = useMemo(() => 
-    selectedCategory?.subCategories.find(s => s.id === formData.subCategory),
+    selectedCategory?.subCategories?.find(s => s.id === formData.subCategory),
   [selectedCategory, formData.subCategory]);
 
   const weightTypes = selectedSubCategory?.weightTypes || [];
+
+  if (categoriesLoading) {
+    return <div className="p-10 flex justify-center"><Loader2 className="animate-spin text-brand-500" /></div>;
+  }
 
   const handleCategoryChange = (e) => {
     setFormData(prev => ({ 
@@ -56,61 +67,78 @@ export function AdminForm({ editingProduct }) {
     }));
   };
 
-  const handleFileLocal = (e) => {
-    const f = e.target.files?.[0];
-    if (f) {
-      setFile(f);
-      setPreviewURL(URL.createObjectURL(f));
+  const handleFilesLocal = (e) => {
+    const newFiles = Array.from(e.target.files || []);
+    if (newFiles.length === 0) return;
+
+    // Limit to 5 images total
+    const totalAllowed = 5 - files.length - previewURLs.filter(u => u.startsWith('http')).length;
+    const filesToAdd = newFiles.slice(0, Math.max(0, totalAllowed));
+
+    if (filesToAdd.length < newFiles.length) {
+      setMessage('Maximum 5 images per product. Some images were skipped.');
     }
+
+    setFiles(prev => [...prev, ...filesToAdd]);
+    const newPreviews = filesToAdd.map(f => URL.createObjectURL(f));
+    setPreviewURLs(prev => [...prev, ...newPreviews]);
   };
 
-  const removeFile = () => {
-    setFile(null);
-    if (previewURL) {
-      URL.revokeObjectURL(previewURL);
-      setPreviewURL(null);
+  const removeImage = (index) => {
+    const preview = previewURLs[index];
+    
+    // If it's a blob URL (new file), also remove from files array
+    if (preview.startsWith('blob:')) {
+      const blobIndex = previewURLs.slice(0, index + 1).filter(u => u.startsWith('blob:')).length - 1;
+      setFiles(prev => prev.filter((_, i) => i !== blobIndex));
+      URL.revokeObjectURL(preview);
     }
+
+    setPreviewURLs(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submit triggered");
     
-    if (!file && !editingProduct?.imageUrl) {
-      setMessage('Please upload an image.');
+    const existingUrls = previewURLs.filter(u => u.startsWith('http'));
+    if (files.length === 0 && existingUrls.length === 0) {
+      setMessage('Please upload at least one image.');
       return;
     }
     
     setIsSubmitting(true);
-    setMessage('Status: Starting compression...');
+    setMessage('Status: Starting...');
     
     try {
-      let imageUrl = editingProduct?.imageUrl;
-
-      if (file) {
-        // Compress
-        const compressedFile = await imageCompression(file, { 
+      // Upload new files
+      const newImageUrls = [];
+      for (let i = 0; i < files.length; i++) {
+        setMessage(`Status: Compressing image ${i + 1}/${files.length}...`);
+        const compressedFile = await imageCompression(files[i], { 
           maxSizeMB: 0.5, 
           maxWidthOrHeight: 1024 
         });
         
-        // Upload
-        setMessage('Status: Uploading image to Storage...');
-        imageUrl = await uploadProductImage(compressedFile, formData.category, (prog) => {
-          setUploadProgress(prog);
+        setMessage(`Status: Uploading image ${i + 1}/${files.length}...`);
+        const url = await uploadProductImage(compressedFile, formData.category, (prog) => {
+          setUploadProgress(Math.round(((i + prog / 100) / files.length) * 100));
         });
+        newImageUrls.push(url);
       }
+
+      // Combine existing URLs with new uploads
+      const allImageUrls = [...existingUrls, ...newImageUrls];
       
-      // Save doc
-      setMessage('Status: Saving to Firestore Database...');
+      setMessage('Status: Saving to Database...');
       const margin = (Number(formData.price || 0) - Number(formData.costPrice || 0));
       const docData = {
         ...formData,
         price: Number(formData.price),
         costPrice: Number(formData.costPrice),
         margin,
-        imageUrl,
-        thumbnailUrl: imageUrl // use same as per prompt
+        imageUrl: allImageUrls[0],           // Backward compatible
+        thumbnailUrl: allImageUrls[0],       // Thumbnail = first image
+        imageUrls: allImageUrls,             // Full array of images
       };
       
       if (editingProduct) {
@@ -124,12 +152,15 @@ export function AdminForm({ editingProduct }) {
           name: '', material: '', color: '', size: '', description: '',
           price: '', costPrice: ''
         });
-        removeFile();
+        // Cleanup blob URLs
+        previewURLs.forEach(u => { if (u.startsWith('blob:')) URL.revokeObjectURL(u); });
+        setFiles([]);
+        setPreviewURLs([]);
       }
       setUploadProgress(0);
     } catch (err) {
       console.error("Form Submission Error:", err);
-      setMessage('Error: ' + (err.message || 'Unknown error occurred. Check browser console.'));
+      setMessage('Error: ' + (err.message || 'Unknown error occurred.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -139,6 +170,7 @@ export function AdminForm({ editingProduct }) {
   const baseLabel = "block text-sm font-medium text-ink-secondary dark:text-gray-400 mb-1";
 
   const margin = (Number(formData.price || 0) - Number(formData.costPrice || 0));
+  const totalImages = previewURLs.length;
 
   return (
     <div className="max-w-2xl mx-auto p-4 sm:p-6 pb-24">
@@ -154,25 +186,37 @@ export function AdminForm({ editingProduct }) {
           {editingProduct ? 'Edit Product' : 'Add Product'}
         </h2>
         
-        {/* Image Upload */}
-        <label className={baseLabel}>Product Image</label>
-        <div className="mb-6 relative h-48 rounded-xl border-2 border-dashed border-surface-border dark:border-dark-border flex items-center justify-center bg-surface-tertiary dark:bg-dark-tertiary overflow-hidden">
-          {previewURL ? (
-            <>
-              <img src={previewURL} alt="Preview" className="w-full h-full object-contain" />
+        {/* Image Upload — Multi-image grid */}
+        <label className={baseLabel}>
+          Product Images 
+          <span className="text-ink-muted dark:text-gray-500 text-xs ml-1">({totalImages}/5)</span>
+        </label>
+        <div className="mb-6 grid grid-cols-3 gap-2">
+          {/* Preview images */}
+          {previewURLs.map((url, i) => (
+            <div key={i} className="relative aspect-square rounded-xl border-2 border-surface-border dark:border-dark-border overflow-hidden bg-surface-tertiary dark:bg-dark-tertiary">
+              <img src={url} alt={`Preview ${i + 1}`} className="w-full h-full object-cover" />
               <button 
                 type="button" 
-                onClick={removeFile}
-                className="absolute top-2 right-2 p-2 bg-black/50 rounded-full text-white hover:bg-black/70"
+                onClick={() => removeImage(i)}
+                className="absolute top-1 right-1 p-1 bg-black/60 rounded-full text-white hover:bg-black/80"
               >
-                <X size={20} />
+                <X size={14} />
               </button>
-            </>
-          ) : (
-            <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer text-ink-secondary dark:text-gray-400">
-              <Upload size={32} className="mb-2" />
-              <span>Tap to upload image</span>
-              <input type="file" accept="image/*" onChange={handleFileLocal} className="hidden" />
+              {i === 0 && (
+                <span className="absolute bottom-1 left-1 bg-brand-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">
+                  MAIN
+                </span>
+              )}
+            </div>
+          ))}
+          
+          {/* Add more button */}
+          {totalImages < 5 && (
+            <label className="aspect-square rounded-xl border-2 border-dashed border-surface-border dark:border-dark-border flex flex-col items-center justify-center cursor-pointer bg-surface-tertiary dark:bg-dark-tertiary text-ink-secondary dark:text-gray-400 hover:border-brand-500 hover:text-brand-500 transition-colors">
+              <Plus size={24} className="mb-1" />
+              <span className="text-[10px]">Add Image</span>
+              <input type="file" accept="image/*" multiple onChange={handleFilesLocal} className="hidden" />
             </label>
           )}
         </div>
@@ -183,7 +227,7 @@ export function AdminForm({ editingProduct }) {
             <label className={baseLabel}>Category</label>
             <select required value={formData.category} onChange={handleCategoryChange} className={baseInput}>
               <option value="" disabled>Select...</option>
-              {CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+              {categories.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
             </select>
           </div>
           <div>

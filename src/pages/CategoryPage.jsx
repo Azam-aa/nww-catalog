@@ -1,12 +1,22 @@
 import { useParams, Link } from 'react-router-dom';
-import { CATEGORIES } from '../data/categories';
+import { useCategories } from '../context/CategoryContext';
 import { SubCategoryList } from '../components/catalog/SubCategoryList';
 import { ChevronLeft } from 'lucide-react';
 import { EmptyState } from '../components/ui/EmptyState';
+import { Spinner } from '../components/ui/Spinner';
 
 export function CategoryPage() {
   const { id } = useParams();
-  const category = CATEGORIES.find(c => c.id === id);
+  const { categories, loading } = useCategories();
+  const category = categories.find(c => c.id === id);
+
+  if (loading) {
+    return (
+      <div className="pt-14 pb-16 flex justify-center items-center h-64">
+        <Spinner />
+      </div>
+    );
+  }
 
   if (!category) {
     return (
