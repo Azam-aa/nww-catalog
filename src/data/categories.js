@@ -19,7 +19,7 @@ export const CATEGORIES = [
   },
   {
     id: 'cots',
-    label: 'Cots',
+    label: 'Cots & Beds',
     icon: 'bed',
     subCategories: [
       { id: 'up-down', label: 'Up & Down Cots', typeCode: 'udc', weightTypes: [] },
@@ -54,17 +54,9 @@ export const CATEGORIES = [
     label: 'Chairs',
     icon: 'armchair',
     subCategories: [
-      { id: 'metal-chairs', label: 'Metal chairs', typeCode: 'mc', weightTypes: [] },
-      { id: 'study-chairs', label: 'Study Chairs', typeCode: 'sc', weightTypes: [] },
-      { id: 'plastic-chairs', label: 'Plastic Chairs', typeCode: 'pc', weightTypes: [] }
-    ]
-  },
-  {
-    id: 'tables',
-    label: 'Tables',
-    icon: 'grid',
-    subCategories: [
-      { id: 'tables', label: 'Tables', typeCode: 'tb', weightTypes: [] }
+      { id: 'metal-chairs', label: 'Metal Chair', typeCode: 'mc', weightTypes: [] },
+      { id: 'steel-chairs', label: 'Steel Chair', typeCode: 'stc', weightTypes: [] },
+      { id: 'plastic-chairs', label: 'Plastic Chair', typeCode: 'pc', weightTypes: [] }
     ]
   },
   {
@@ -85,19 +77,20 @@ export const CATEGORIES = [
     ]
   },
   {
+    id: 'tables',
+    label: 'Tables',
+    icon: 'grid',
+    subCategories: [
+      { id: 'office-table', label: 'Office Table', typeCode: 'ot', weightTypes: [] },
+      { id: 'dining-table', label: 'Dining Table', typeCode: 'dnt', weightTypes: [] }
+    ]
+  },
+  {
     id: 'lockers',
     label: 'Lockers',
     icon: 'cabinet',
     subCategories: [
       { id: 'lockers', label: 'Lockers', typeCode: 'lk', weightTypes: [] }
-    ]
-  },
-  {
-    id: 'dining-tables',
-    label: 'Dining Tables',
-    icon: 'grid',
-    subCategories: [
-      { id: 'dining-tables', label: 'Dining Tables', typeCode: 'dnt', weightTypes: [] }
     ]
   },
   {

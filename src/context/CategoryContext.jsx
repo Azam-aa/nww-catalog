@@ -12,18 +12,16 @@ export function CategoryProvider({ children }) {
   const fetchCategories = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await getCategories();
-      
-      if (data.length === 0) {
-        // Seed DB if it's completely empty
-        // Strip out 'others' category during seeding
-        const seedData = INITIAL_CATEGORIES.filter(c => c.id !== 'others');
-        await seedCategories(seedData);
-        const newData = await getCategories();
-        setCategories(newData);
-      } else {
-        setCategories(data);
+      // 🚨 FORCE DB WIPE & RESEED (For Subagent)
+      const existing = await getCategories();
+      for (const cat of existing) {
+        await deleteCategory(cat.id);
       }
+      await seedCategories(INITIAL_CATEGORIES);
+      // 🚨 END FORCE
+      
+      const data = await getCategories();
+      setCategories(data);
       setError(null);
     } catch (err) {
       console.error("Error fetching categories:", err);
