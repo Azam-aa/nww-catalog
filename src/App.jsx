@@ -5,6 +5,7 @@ import { HomePage } from './pages/HomePage';
 import { CategoryPage } from './pages/CategoryPage';
 import { ProductListPage } from './pages/ProductListPage';
 import { AdminPage } from './pages/AdminPage';
+import { SearchPage } from './pages/SearchPage';
 import { ShareCartPage } from './pages/ShareCartPage';
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
       <main>
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/search" element={<SearchPage />} />
           <Route path="/category/:id" element={<CategoryPage />} />
           <Route path="/products/:cat/:sub" element={<ProductListPage />} />
           <Route path="/admin" element={<AdminPage />} />

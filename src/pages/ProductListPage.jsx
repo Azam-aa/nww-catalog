@@ -48,7 +48,7 @@ export function ProductListPage() {
         <div className="p-4 text-red-500 text-center">{error}</div>
       ) : (
         <div className="flex-1">
-          <ProductGrid isEmpty={products.length === 0 && !loading}>
+          <ProductGrid isEmpty={products.length === 0 && !productsLoading}>
             {products.map(product => (
               <ProductCard 
                 key={product.id} 
@@ -60,7 +60,7 @@ export function ProductListPage() {
           
           {/* Loading Indicator */}
           <div ref={sentinelRef} className="h-16 flex items-center justify-center">
-            {loading && <Spinner />}
+            {productsLoading && <Spinner />}
           </div>
         </div>
       )}

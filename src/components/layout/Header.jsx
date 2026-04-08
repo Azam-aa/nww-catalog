@@ -1,6 +1,6 @@
 import { useShopMode } from '../../context/ShopModeContext';
 import { ThemeToggle } from '../ui/ThemeToggle';
-import { Lock, Unlock, Plus } from 'lucide-react';
+import { Lock, Unlock, Plus, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export function Header() {
@@ -14,6 +14,13 @@ export function Header() {
       </Link>
       
       <div className="flex items-center space-x-2">
+        <Link 
+          to="/search" 
+          className="p-2 hover:bg-surface-secondary dark:hover:bg-dark-secondary rounded-full transition-colors text-ink-primary dark:text-white"
+          aria-label="Search products"
+        >
+          <Search size={20} />
+        </Link>
         {shopMode && (
           <Link 
             to="/admin" 

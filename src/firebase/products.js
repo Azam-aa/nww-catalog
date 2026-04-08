@@ -26,6 +26,22 @@ export async function getProducts({ category, subCategory, lastDoc = null }) {
   return { products, lastVisible, hasMore };
 }
 
+export async function getAllProducts() {
+  const q = query(
+    collection(db, 'products'),
+    where('isActive', '==', true)
+  );
+  const snapshot = await getDocs(q);
+  // Sort manually by createdAt DESC in JS to avoid requiring a composite index
+  return snapshot.docs
+    .map(doc => ({ id: doc.id, ...doc.data() }))
+    .sort((a, b) => {
+      const timeA = a.createdAt?.seconds || 0;
+      const timeB = b.createdAt?.seconds || 0;
+      return timeB - timeA;
+    });
+}
+
 export async function addProduct(data) {
   try {
     const docRef = await addDoc(collection(db, 'products'), {

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { getCategories, seedCategories } from '../firebase/categories';
+import { getCategories, seedCategories, deleteCategory } from '../firebase/categories';
 import { CATEGORIES as INITIAL_CATEGORIES } from '../data/categories';
 
 const CategoryContext = createContext();
@@ -12,14 +12,6 @@ export function CategoryProvider({ children }) {
   const fetchCategories = useCallback(async () => {
     setLoading(true);
     try {
-      // 🚨 FORCE DB WIPE & RESEED (For Subagent)
-      const existing = await getCategories();
-      for (const cat of existing) {
-        await deleteCategory(cat.id);
-      }
-      await seedCategories(INITIAL_CATEGORIES);
-      // 🚨 END FORCE
-      
       const data = await getCategories();
       setCategories(data);
       setError(null);

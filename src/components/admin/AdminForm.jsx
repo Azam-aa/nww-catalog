@@ -130,11 +130,14 @@ export function AdminForm({ editingProduct }) {
       const allImageUrls = [...existingUrls, ...newImageUrls];
       
       setMessage('Status: Saving to Database...');
-      const margin = (Number(formData.price || 0) - Number(formData.costPrice || 0));
+      const p = formData.price === '' ? null : Number(formData.price);
+      const cp = formData.costPrice === '' ? null : Number(formData.costPrice);
+      const margin = (p !== null && cp !== null) ? (p - cp) : null;
+
       const docData = {
         ...formData,
-        price: Number(formData.price),
-        costPrice: Number(formData.costPrice),
+        price: p,
+        costPrice: cp,
         margin,
         imageUrl: allImageUrls[0],           // Backward compatible
         thumbnailUrl: allImageUrls[0],       // Thumbnail = first image
@@ -169,7 +172,9 @@ export function AdminForm({ editingProduct }) {
   const baseInput = "w-full bg-surface-secondary dark:bg-dark-secondary border border-surface-border dark:border-dark-border rounded-lg px-4 py-2 text-ink-primary dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 mb-4";
   const baseLabel = "block text-sm font-medium text-ink-secondary dark:text-gray-400 mb-1";
 
-  const margin = (Number(formData.price || 0) - Number(formData.costPrice || 0));
+  const p_val = formData.price === '' ? null : Number(formData.price);
+  const cp_val = formData.costPrice === '' ? null : Number(formData.costPrice);
+  const margin = (p_val !== null && cp_val !== null) ? (p_val - cp_val) : null;
   const totalImages = previewURLs.length;
 
   return (
@@ -246,7 +251,7 @@ export function AdminForm({ editingProduct }) {
           </div>
           <div>
             <label className={baseLabel}>Weight Type</label>
-            <select required={weightTypes.length > 0} value={formData.weightType} onChange={e => setFormData({...formData, weightType: e.target.value})} disabled={weightTypes.length === 0} className={baseInput}>
+            <select value={formData.weightType} onChange={e => setFormData({...formData, weightType: e.target.value})} disabled={weightTypes.length === 0} className={baseInput}>
               <option value="" disabled>None</option>
               {weightTypes.map(w => <option key={w} value={w}>{w}</option>)}
               {weightTypes.length === 0 && <option value="">N/A</option>}
@@ -279,15 +284,15 @@ export function AdminForm({ editingProduct }) {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-surface-border dark:border-dark-border pt-4 mt-2">
           <div>
             <label className={baseLabel}>Selling Price (₹)</label>
-            <input required type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className={baseInput} />
+            <input type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className={baseInput} />
           </div>
           <div>
             <label className={baseLabel}>Cost Price (₹)</label>
-            <input required type="number" value={formData.costPrice} onChange={e => setFormData({...formData, costPrice: e.target.value})} className={baseInput} />
+            <input type="number" value={formData.costPrice} onChange={e => setFormData({...formData, costPrice: e.target.value})} className={baseInput} />
           </div>
           <div>
             <label className={baseLabel}>Margin</label>
-            <input type="text" readOnly value={`₹${margin}`} className={`${baseInput} font-bold opacity-80 ${margin >= 0 ? 'text-brand-600' : 'text-red-500'}`} />
+            <input type="text" readOnly value={margin !== null ? `₹${margin}` : '-'} className={`${baseInput} font-bold opacity-80 ${margin >= 0 && margin !== null ? 'text-brand-600' : (margin === null ? 'text-ink-muted' : 'text-red-500')}`} />
           </div>
         </div>
 
