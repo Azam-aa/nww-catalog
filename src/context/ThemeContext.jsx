@@ -5,7 +5,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(true);
 
   useEffect(() => {
     try {
@@ -13,7 +13,7 @@ export function ThemeProvider({ children }) {
       if (saved) {
         setIsDark(saved === 'dark');
       } else {
-        setIsDark(window.matchMedia('(prefers-color-scheme: dark)').matches);
+        setIsDark(true);
       }
     } catch (e) {
       console.error('Failed to load theme preference:', e);

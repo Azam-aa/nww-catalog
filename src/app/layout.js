@@ -32,7 +32,7 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${syne.variable} ${dmSans.variable}`}>
+    <html lang="en" className={`dark ${syne.variable} ${dmSans.variable}`}>
       <body className="min-h-screen bg-surface-primary dark:bg-dark-primary text-ink-primary dark:text-white transition-colors duration-200 selection:bg-brand-500/30">
         <Providers>
           <Header />
