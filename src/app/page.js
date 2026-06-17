@@ -70,7 +70,7 @@ export default async function HomePage() {
 
       {/* Categories Grid */}
       <div className="p-4 flex-1">
-        <h2 className="text-lg font-heading font-extrabold text-ink-primary dark:text-white mb-4 uppercase tracking-wider">
+        <h2 className="text-center my-8 text-lg font-heading font-extrabold text-ink-primary dark:text-white uppercase tracking-wider">
           Categories
         </h2>
 

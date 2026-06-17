@@ -6,9 +6,9 @@ export async function POST(request) {
   try {
     const { username, password } = await request.json();
 
-    // Use environment variables if configured, otherwise default to 'nww' / 'nww'
+    // Use environment variables if configured, otherwise default to 'nww' / '@2024'
     const validUsername = process.env.GLOBAL_USERNAME || 'nww';
-    const validPassword = process.env.GLOBAL_PASSWORD || 'nww';
+    const validPassword = process.env.GLOBAL_PASSWORD || '@2024';
 
     if (username === validUsername && password === validPassword) {
       const response = NextResponse.json({ success: true });
