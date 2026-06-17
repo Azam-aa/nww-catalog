@@ -8,6 +8,12 @@ export const dynamic = 'force-dynamic';
 // Revalidate page data frequently (e.g. every 10 seconds)
 export const revalidate = 10;
 
+function getPlaceholderImage(text) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"><rect width="100%" height="100%" fill="%23f0f0ec"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="bold" fill="%236b6b66">${text}</text></svg>`;
+  const base64 = Buffer.from(svg).toString('base64');
+  return `data:image/svg+xml;base64,${base64}`;
+}
+
 export default async function HomePage() {
   // 1. Fetch categories
   const { data: categoriesData, error: catError } = await supabase
@@ -49,7 +55,7 @@ export default async function HomePage() {
       coverImage = catProducts[0].image_url;
     }
     if (!coverImage) {
-      coverImage = `https://via.placeholder.com/400x300/f0f0ec/6b6b66?text=${encodeURIComponent(cat.name)}`;
+      coverImage = getPlaceholderImage(cat.name);
     }
 
     return {
@@ -100,6 +106,7 @@ export default async function HomePage() {
                     src={category.coverImage}
                     alt={category.name}
                     fill
+                    unoptimized={category.coverImage.startsWith('data:').toString() === 'true'}
                     sizes="(max-width: 640px) 100vw, 350px"
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
                     priority={category.display_order <= 2}
