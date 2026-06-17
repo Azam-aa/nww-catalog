@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
+import { revalidateTag, revalidatePath } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,14 +39,22 @@ export async function POST(request) {
     }
 
     // 3. Delete from database
-    const { error: dbError } = await supabaseAdmin
+    const { data, error: dbError } = await supabaseAdmin
       .from('products')
       .delete()
-      .eq('id', productId);
+      .eq('id', productId)
+      .select();
 
     if (dbError) {
       console.error('Error deleting product from database:', dbError);
       return NextResponse.json({ error: dbError.message }, { status: 500 });
+    }
+
+    if (data && data[0]) {
+      const categoryId = data[0].category_id;
+      revalidateTag('products');
+      revalidateTag(`products-category-${categoryId}`);
+      revalidatePath('/');
     }
 
     return NextResponse.json({ success: true });

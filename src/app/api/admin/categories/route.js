@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
+import { revalidateTag, revalidatePath } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
 
@@ -61,6 +62,26 @@ export async function POST(request) {
     const { action, category, categoryId } = payload;
     const supabaseAdmin = getSupabaseAdmin();
 
+    if (action === 'updateCategoryCover') {
+      const { categoryId, coverImageUrl } = payload;
+      if (!categoryId) {
+        return NextResponse.json({ error: 'Missing categoryId' }, { status: 400 });
+      }
+
+      const { error } = await supabaseAdmin
+        .from('categories')
+        .update({ cover_image_url: coverImageUrl || null })
+        .eq('id', categoryId);
+
+      if (error) throw error;
+
+      revalidateTag('categories');
+      revalidatePath('/');
+      revalidatePath(`/category/${categoryId}`);
+
+      return NextResponse.json({ success: true });
+    }
+
     if (action === 'deleteCategory') {
       const { error } = await supabaseAdmin
         .from('categories')
@@ -68,6 +89,11 @@ export async function POST(request) {
         .eq('id', categoryId);
 
       if (error) throw error;
+
+      revalidateTag('categories');
+      revalidatePath('/');
+      revalidatePath(`/category/${categoryId}`);
+
       return NextResponse.json({ success: true });
     }
 
@@ -121,6 +147,10 @@ export async function POST(request) {
         if (subInsertError) throw subInsertError;
       }
 
+      revalidateTag('categories');
+      revalidatePath('/');
+      revalidatePath(`/category/${slug}`);
+
       return NextResponse.json({ success: true });
     }
 
@@ -171,6 +201,9 @@ export async function POST(request) {
           if (seedSubErr) throw seedSubErr;
         }
       }
+
+      revalidateTag('categories');
+      revalidatePath('/');
 
       return NextResponse.json({ success: true });
     }

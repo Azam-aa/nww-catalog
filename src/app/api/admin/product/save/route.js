@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { getSupabaseAdmin } from '../../../../../lib/supabase';
+import { revalidateTag, revalidatePath } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
 
@@ -74,6 +75,12 @@ export async function POST(request) {
 
       if (error) throw error;
       result = data[0];
+    }
+
+    if (result) {
+      revalidateTag('products');
+      revalidateTag(`products-category-${result.category_id}`);
+      revalidatePath('/');
     }
 
     return NextResponse.json({ success: true, product: result });

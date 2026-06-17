@@ -1,18 +1,11 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST() {
-  const response = NextResponse.json({ success: true });
+  const cookieStore = cookies();
+  cookieStore.delete('nww_admin_session');
   
-  // Clear cookie by setting Max-Age to 0
-  response.cookies.set('nww_admin_session', '', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    maxAge: 0,
-    path: '/',
-  });
-
-  return response;
+  return NextResponse.json({ success: true });
 }

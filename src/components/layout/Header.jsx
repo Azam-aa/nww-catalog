@@ -6,7 +6,7 @@ import { Lock, Unlock, Plus, Search } from 'lucide-react';
 import { useAdmin } from '../../context/AdminContext';
 
 export function Header() {
-  const { isAdmin, loading } = useAdmin();
+  const { isAdmin, loading, logout } = useAdmin();
 
   return (
     <header className="fixed top-0 left-0 right-0 h-[56px] bg-surface-primary dark:bg-dark-primary border-b border-surface-border dark:border-dark-border z-40 flex items-center justify-between px-4">
@@ -33,17 +33,23 @@ export function Header() {
           </Link>
         )}
         <ThemeToggle />
-        <Link
-          href="/admin"
-          className="p-2 hover:bg-surface-secondary dark:hover:bg-dark-secondary rounded-full transition-colors"
-          aria-label="Admin access"
-        >
-          {!loading && isAdmin ? (
+        {!loading && isAdmin ? (
+          <button
+            onClick={logout}
+            className="p-2 hover:bg-surface-secondary dark:hover:bg-dark-secondary rounded-full transition-colors"
+            aria-label="Lock Admin"
+          >
             <Unlock className="text-brand-500" size={20} />
-          ) : (
+          </button>
+        ) : (
+          <Link
+            href="/admin"
+            className="p-2 hover:bg-surface-secondary dark:hover:bg-dark-secondary rounded-full transition-colors"
+            aria-label="Admin access"
+          >
             <Lock className="text-ink-secondary dark:text-gray-400" size={20} />
-          )}
-        </Link>
+          </Link>
+        )}
       </div>
     </header>
   );

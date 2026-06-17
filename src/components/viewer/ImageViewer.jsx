@@ -26,6 +26,35 @@ export function ImageViewer({
   const [showAssignDropdown, setShowAssignDropdown] = useState(false);
   const [tempSubCategoryId, setTempSubCategoryId] = useState(product?.subcategory_id || '');
   const [assigning, setAssigning] = useState(false);
+  const [settingCover, setSettingCover] = useState(false);
+
+  const handleSetCoverImage = async (e) => {
+    e.stopPropagation();
+    setSettingCover(true);
+    try {
+      const currentImage = allImages[currentImageIndex];
+      const res = await fetch('/api/admin/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'updateCategoryCover',
+          categoryId: product.category_id,
+          coverImageUrl: currentImage,
+        }),
+      });
+
+      if (res.ok) {
+        alert('Category cover image updated successfully!');
+      } else {
+        const errorData = await res.json();
+        alert('Failed to set cover image: ' + (errorData.error || 'Unknown error'));
+      }
+    } catch (err) {
+      alert('Error setting cover image: ' + err.message);
+    } finally {
+      setSettingCover(false);
+    }
+  };
 
   // Carousel images
   const allImages = product?.imageUrls?.length > 0 ? product.imageUrls : [product?.image_url || product?.imageUrl];
@@ -195,7 +224,7 @@ export function ImageViewer({
 
       {/* Lazy Categorize Button for Admin */}
       {isAdmin && !showDetails && scale === 1 && (
-        <div className="absolute bottom-[110px] inset-x-0 flex justify-center z-10">
+        <div className="absolute bottom-[110px] inset-x-0 flex flex-col sm:flex-row items-center justify-center gap-2 z-10">
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -204,6 +233,13 @@ export function ImageViewer({
             className="bg-brand-500 hover:bg-brand-650 text-white font-bold px-6 py-2.5 rounded-full text-xs shadow-lg active:scale-95 transition-transform"
           >
             Assign to Subcategory
+          </button>
+          <button
+            onClick={handleSetCoverImage}
+            disabled={settingCover}
+            className="bg-zinc-800 hover:bg-zinc-700 text-white font-bold px-6 py-2.5 rounded-full text-xs shadow-lg active:scale-95 transition-transform disabled:opacity-50 border border-zinc-700"
+          >
+            {settingCover ? 'Setting Cover...' : 'Set as Category Cover'}
           </button>
         </div>
       )}

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
+import { revalidateTag, revalidatePath } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
 
@@ -72,6 +73,10 @@ export async function POST(request) {
       console.error('Supabase Database Write Error:', dbError);
       return NextResponse.json({ error: 'Database write failed: ' + dbError.message }, { status: 500 });
     }
+
+    revalidateTag('products');
+    revalidateTag(`products-category-${categoryId}`);
+    revalidatePath('/');
 
     return NextResponse.json({ success: true, product: dbData[0] });
   } catch (error) {

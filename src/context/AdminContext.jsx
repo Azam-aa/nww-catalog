@@ -44,6 +44,9 @@ export function AdminProvider({ children }) {
   const logout = async () => {
     await fetch('/api/admin/logout', { method: 'POST' });
     setIsAdmin(false);
+    if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) {
+      window.location.href = '/';
+    }
   };
 
   return (

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
+import { revalidateTag, revalidatePath } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,6 +38,13 @@ export async function POST(request) {
     if (error) {
       console.error('Error updating product subcategory:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    if (data && data[0]) {
+      const categoryId = data[0].category_id;
+      revalidateTag('products');
+      revalidateTag(`products-category-${categoryId}`);
+      revalidatePath('/');
     }
 
     return NextResponse.json({ success: true, product: data[0] });
