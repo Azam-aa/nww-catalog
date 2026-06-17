@@ -25,7 +25,9 @@ export function middleware(request) {
   if (!session || session.value !== 'authenticated') {
     console.log(`[Middleware] Unauthorized access to ${pathname}, redirecting to /login`);
     const loginUrl = new URL('/login', request.url);
-    return NextResponse.redirect(loginUrl);
+    const response = NextResponse.redirect(loginUrl);
+    response.headers.set('Cache-Control', 'no-store, max-age=0, must-revalidate');
+    return response;
   }
 
   return NextResponse.next();

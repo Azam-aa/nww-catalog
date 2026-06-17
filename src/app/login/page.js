@@ -22,8 +22,8 @@ export default function LoginPage() {
       });
 
       if (res.ok) {
-        // Force reload page to home where the middleware will now allow access
-        window.location.href = '/';
+        // Force reload page to home and bypass browser redirect cache with timestamp
+        window.location.href = '/?t=' + Date.now();
       } else {
         setLoginError(true);
       }
