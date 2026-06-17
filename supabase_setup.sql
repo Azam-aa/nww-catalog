@@ -112,8 +112,8 @@ INSERT INTO subcategories (id, category_id, name, slug, display_order) VALUES
 ('single-h', 'cots', 'Single Cots (H)', 'single-h', 5),
 ('double-rm', 'cots', 'Double cots (RM)', 'double-rm', 6),
 ('double-mh', 'cots', 'Double cots (MH)', 'double-mh', 7),
-('four-and-half', 'cots', '4½\'×6\'.2" cots (H)', 'four-and-half', 8),
-('five-by-six', 'cots', '5\'×6½\' cots (H)', 'five-by-six', 9),
+('four-and-half', 'cots', '4½''×6''.2" cots (H)', 'four-and-half', 8),
+('five-by-six', 'cots', '5''×6½'' cots (H)', 'five-by-six', 9),
 -- Sofa (1 type)
 ('sofa-diwan', 'sofa', 'Sofa & Diwan cot', 'sofa-diwan', 1),
 -- Dressing Table (1 type)
