@@ -1,13 +1,18 @@
 import { fontFamily } from 'tailwindcss/defaultTheme';
 
+/** @type {import('tailwindcss').Config} */
 export default {
-  content: ['./index.html', './src/**/*.{js,jsx}'],
+  content: [
+    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
   darkMode: 'class',
   theme: {
     extend: {
       fontFamily: {
-        heading: ['Syne', ...fontFamily.sans],
-        body: ['DM Sans', ...fontFamily.sans],
+        heading: ['var(--font-heading)', ...fontFamily.sans],
+        body: ['var(--font-body)', ...fontFamily.sans],
       },
       colors: {
         brand: {

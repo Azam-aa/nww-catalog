@@ -1,20 +1,30 @@
+'use client';
+
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const ShareCartContext = createContext();
 
 export function ShareCartProvider({ children }) {
-  const [cartItems, setCartItems] = useState(() => {
-    try {
-      const saved = localStorage.getItem('nww_share_cart');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [cartItems, setCartItems] = useState([]);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem('nww_share_cart', JSON.stringify(cartItems));
-  }, [cartItems]);
+    try {
+      const saved = localStorage.getItem('nww_share_cart');
+      if (saved) {
+        setCartItems(JSON.parse(saved));
+      }
+    } catch (e) {
+      console.error('Failed to load shortlist from localStorage:', e);
+    }
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isMounted) {
+      localStorage.setItem('nww_share_cart', JSON.stringify(cartItems));
+    }
+  }, [cartItems, isMounted]);
 
   const addToCart = useCallback((product) => {
     setCartItems(prev => {

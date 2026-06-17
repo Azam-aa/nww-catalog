@@ -1,20 +1,23 @@
-import { Link, useLocation } from 'react-router-dom';
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useShareCart } from '../../context/ShareCartContext';
 import { Home, ShoppingBag } from 'lucide-react';
 
 export function BottomNav() {
   const { cartCount } = useShareCart();
-  const location = useLocation();
+  const pathname = usePathname();
 
-  const isHome = location.pathname === '/';
-  const isCart = location.pathname === '/share-cart';
+  const isHome = pathname === '/';
+  const isCart = pathname === '/share-cart';
 
   return (
     <nav className="fixed bottom-0 inset-x-0 z-40 bg-surface-primary/95 dark:bg-dark-primary/95 backdrop-blur-xl border-t border-surface-border dark:border-dark-border">
       <div className="flex items-center justify-around py-2 max-w-lg mx-auto">
         {/* Home */}
         <Link
-          to="/"
+          href="/"
           className={`flex flex-col items-center gap-0.5 px-6 py-1.5 rounded-xl transition-colors ${
             isHome 
               ? 'text-brand-600 dark:text-brand-400' 
@@ -27,7 +30,7 @@ export function BottomNav() {
 
         {/* Share Cart */}
         <Link
-          to="/share-cart"
+          href="/share-cart"
           className={`relative flex flex-col items-center gap-0.5 px-6 py-1.5 rounded-xl transition-colors ${
             isCart 
               ? 'text-brand-600 dark:text-brand-400' 
