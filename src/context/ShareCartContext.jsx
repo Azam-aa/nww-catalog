@@ -29,15 +29,18 @@ export function ShareCartProvider({ children }) {
   const addToCart = useCallback((product) => {
     setCartItems(prev => {
       if (prev.find(p => p.id === product.id)) return prev;
+      const name = product.name || product.title || 'Furniture Design';
+      const imageUrl = product.imageUrl || product.image_url;
+      const imageUrls = product.imageUrls || (product.image_url ? [product.image_url] : []) || [imageUrl];
       return [...prev, {
         id: product.id,
-        name: product.name,
+        name,
         color: product.color || '',
         material: product.material || '',
         size: product.size || '',
         price: product.price,
-        imageUrl: product.imageUrl,
-        imageUrls: product.imageUrls || [product.imageUrl],
+        imageUrl,
+        imageUrls,
       }];
     });
   }, []);
