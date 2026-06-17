@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 
 export function middleware(request) {
   const { pathname } = request.nextUrl;
+  const session = request.cookies.get('nww_site_session');
+
+  console.log(`[Middleware] Path: ${pathname}, Session: ${session ? session.value : 'none'}`);
 
   // 1. Exclude public assets, static files, next internal files, and APIs
   if (
@@ -19,9 +22,8 @@ export function middleware(request) {
   }
 
   // 3. Check for site auth cookie
-  const session = request.cookies.get('nww_site_session');
   if (!session || session.value !== 'authenticated') {
-    // Redirect to login page
+    console.log(`[Middleware] Unauthorized access to ${pathname}, redirecting to /login`);
     const loginUrl = new URL('/login', request.url);
     return NextResponse.redirect(loginUrl);
   }

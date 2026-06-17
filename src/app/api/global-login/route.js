@@ -17,7 +17,7 @@ export async function POST(request) {
       response.cookies.set('nww_site_session', 'authenticated', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: 'lax',
         maxAge: 315360000, // 10 years
         path: '/',
       });
