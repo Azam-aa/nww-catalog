@@ -322,19 +322,7 @@ export function CategoryView({ category, subcategories, initialProducts }) {
             All ({counts.all || 0})
           </button>
 
-          {/* UNASSIGNED Filter (Only visible to admin) */}
-          {isAdmin && (
-            <button
-              onClick={() => handleFilterChange('uncategorized')}
-              className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 active:scale-95 flex items-center gap-1 ${
-                activeFilter === 'uncategorized'
-                  ? 'bg-orange-500 text-white shadow-md'
-                  : 'bg-orange-50/50 dark:bg-orange-950/10 text-orange-600 dark:text-orange-400 border border-orange-200/50 dark:border-orange-900/30'
-              }`}
-            >
-              Uncategorized ({counts.uncategorized || 0})
-            </button>
-          )}
+
 
           {/* Subcategory List Filters */}
           {subcategories.map(sub => {
