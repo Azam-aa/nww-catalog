@@ -68,14 +68,14 @@ export default async function HomePage() {
   return (
     <div className="flex flex-col min-h-screen bg-surface-secondary dark:bg-dark-primary">
       {/* Brand Hero Banner */}
-      <div className="px-5 py-8 bg-surface-primary dark:bg-dark-secondary border-b border-surface-border dark:border-dark-border text-left">
+      <div className="px-5 py-8 bg-surface-primary dark:bg-dark-secondary border-b border-surface-border dark:border-dark-border text-center">
         <p className="text-xs font-bold text-brand-600 dark:text-brand-400 tracking-widest uppercase mb-1">
           Koppal, Karnataka
         </p>
         <h1 className="text-3xl font-heading font-extrabold tracking-tight text-ink-primary dark:text-white leading-none mb-2">
           National Welding Works
         </h1>
-        <p className="text-sm text-ink-secondary dark:text-gray-400 max-w-sm">
+        <p className="text-sm text-ink-secondary dark:text-gray-400 max-w-sm mx-auto">
           Steel Furniture Manufacturers. Browse our premium product catalog below.
         </p>
       </div>
