@@ -34,7 +34,7 @@ export default function ShareCartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-surface-secondary dark:bg-dark-primary pb-32">
+    <div className="min-h-screen bg-surface-secondary dark:bg-dark-primary pb-40">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-surface-border dark:border-dark-border bg-surface-primary dark:bg-dark-secondary sticky top-[56px] z-30">
         <div className="flex items-center space-x-1">
@@ -100,7 +100,7 @@ export default function ShareCartPage() {
       </div>
 
       {/* Bottom Share Bar */}
-      <div className="fixed bottom-0 inset-x-0 z-40 bg-surface-primary/95 dark:bg-dark-secondary/95 backdrop-blur-xl border-t border-surface-border dark:border-dark-border p-4 max-w-lg mx-auto rounded-t-2xl shadow-xl">
+      <div className="fixed bottom-[56px] inset-x-0 z-40 bg-surface-primary/95 dark:bg-dark-secondary/95 backdrop-blur-xl border-t border-surface-border dark:border-dark-border p-4 max-w-lg mx-auto rounded-t-2xl shadow-xl">
         {showShareOptions ? (
           <div className="space-y-2">
             <p className="text-xs text-ink-secondary dark:text-gray-400 text-center mb-3 font-bold">
