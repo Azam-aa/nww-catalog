@@ -1,0 +1,11 @@
+{
+  "remoteName": "origin",
+  "projects": [
+    {
+      "id": "prj_HxNjpXiRWhoEQsm7PBB3xhl9DVBQ",
+      "name": "nww-catalog",
+      "directory": ".",
+      "orgId": "team_j6DX9qLn6wEE9D3NptGaYCDM"
+    }
+  ]
+}

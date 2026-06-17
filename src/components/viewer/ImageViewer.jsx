@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
+import Image from 'next/image';
 import { X, Share2, ZoomIn, ChevronLeft, ChevronRight, Bookmark, BookmarkCheck } from 'lucide-react';
 import { usePinchZoom } from '../../hooks/usePinchZoom';
 import { DetailsBottomSheet } from './DetailsBottomSheet';
@@ -152,18 +153,21 @@ export function ImageViewer({
 
       {/* Image Area */}
       <div 
-        className="w-full h-full flex items-center justify-center overflow-hidden"
+        className="relative w-full h-full flex items-center justify-center overflow-hidden"
         {...bindDrag()}
         onClick={() => {
           if (scale === 1) setShowDetails(!showDetails);
         }}
         onDoubleClick={handleDoubleTap}
       >
-        <img
+        <Image
           ref={imageRef}
           src={allImages[currentImageIndex]}
           alt={`${product.title || 'Product'} - Image ${currentImageIndex + 1}`}
-          className="max-w-full max-h-full object-contain origin-center transition-transform duration-200"
+          fill
+          sizes="100vw"
+          priority={true}
+          className="object-contain origin-center transition-transform duration-200"
           style={{ transform: `scale(${scale})` }}
           {...bindPinch()}
         />

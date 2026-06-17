@@ -5,8 +5,10 @@ import { useRouter } from 'next/navigation';
 import { Search, X, ChevronLeft, HelpCircle } from 'lucide-react';
 import { getAllProducts } from '../../lib/db';
 import { ProductCard } from '../../components/catalog/ProductCard';
-import { ImageViewer } from '../../components/viewer/ImageViewer';
+import dynamic from 'next/dynamic';
 import { Loader2 } from 'lucide-react';
+
+const ImageViewer = dynamic(() => import('../../components/viewer/ImageViewer').then(mod => mod.ImageViewer), { ssr: false });
 
 export default function SearchPage() {
   const router = useRouter();

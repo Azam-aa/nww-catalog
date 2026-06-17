@@ -1,12 +1,10 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { supabase } from '../lib/supabase';
+import { getCategories, getProductsForCounts } from '../lib/db';
 import { ChevronRight } from 'lucide-react';
 
-export const dynamic = 'force-dynamic';
-
-// Revalidate page data frequently (e.g. every 10 seconds)
-export const revalidate = 10;
+// Revalidate page data every 1 hour (static generation + ISR)
+export const revalidate = 3600;
 
 function getPlaceholderImage(text) {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"><rect width="100%" height="100%" fill="%23f0f0ec"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="bold" fill="%236b6b66">${text}</text></svg>`;
@@ -16,26 +14,16 @@ function getPlaceholderImage(text) {
 
 export default async function HomePage() {
   // 1. Fetch categories
-  const { data: categoriesData, error: catError } = await supabase
-    .from('categories')
-    .select('*')
-    .order('display_order', { ascending: true });
-
-  if (catError) {
-    console.error('Error fetching categories for homepage:', catError);
-  }
-  const categories = categoriesData || [];
+  const categories = await getCategories().catch(err => {
+    console.error('Error fetching categories for homepage:', err);
+    return [];
+  });
 
   // 2. Fetch products for counts and cover images
-  const { data: productsData, error: prodError } = await supabase
-    .from('products')
-    .select('category_id, image_url, status')
-    .order('created_at', { ascending: true });
-
-  if (prodError) {
-    console.error('Error fetching products for homepage counts:', prodError);
-  }
-  const products = productsData || [];
+  const products = await getProductsForCounts().catch(err => {
+    console.error('Error fetching products for homepage counts:', err);
+    return [];
+  });
 
   // 3. Process categories
   const categoriesWithMeta = categories.map(cat => {

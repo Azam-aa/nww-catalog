@@ -1,19 +1,20 @@
 import { notFound } from 'next/navigation';
-import { supabase } from '../../../lib/supabase';
+import { getCategories, getCategoryBySlug, getSubcategories, getProductsCached } from '../../../lib/db';
 import { CategoryView } from '../../../components/catalog/CategoryView';
 
-export const dynamic = 'force-dynamic';
+// Revalidate category details every 1 hour (static generation + ISR)
+export const revalidate = 3600;
 
-// Revalidate category details often
-export const revalidate = 10;
+// Pre-render category pages at build time
+export async function generateStaticParams() {
+  const categories = await getCategories().catch(() => []);
+  return categories.map((cat) => ({
+    slug: cat.slug,
+  }));
+}
 
 export async function generateMetadata({ params }) {
-  const { data: categories } = await supabase
-    .from('categories')
-    .select('name')
-    .eq('slug', params.slug);
-
-  const category = categories && categories[0];
+  const category = await getCategoryBySlug(params.slug).catch(() => null);
   if (!category) return { title: 'Category Not Found' };
 
   return {
@@ -26,42 +27,17 @@ export default async function CategoryPage({ params }) {
   const { slug } = params;
 
   // 1. Fetch category
-  const { data: categories, error: catError } = await supabase
-    .from('categories')
-    .select('*')
-    .eq('slug', slug);
-
-  if (catError) {
-    console.error('Error fetching category:', catError);
-  }
-
-  const category = categories && categories[0];
+  const category = await getCategoryBySlug(slug).catch(() => null);
   if (!category) {
     // Safely trigger Next.js 404 Page
     notFound();
   }
 
-  // 2. Fetch subcategories for this category
-  const { data: subcategories, error: subError } = await supabase
-    .from('subcategories')
-    .select('*')
-    .eq('category_id', category.id)
-    .order('display_order', { ascending: true });
+  // 2. Fetch subcategories for this category (cached)
+  const subcategories = await getSubcategories(category.id).catch(() => []);
 
-  if (subError) {
-    console.error('Error fetching subcategories:', subError);
-  }
-
-  // 3. Fetch products for this category
-  const { data: products, error: prodError } = await supabase
-    .from('products')
-    .select('*')
-    .eq('category_id', category.id)
-    .order('created_at', { ascending: false });
-
-  if (prodError) {
-    console.error('Error fetching products:', prodError);
-  }
+  // 3. Fetch initial products for this category (cached, limit 50)
+  const products = await getProductsCached(category.id).catch(() => []);
 
   return (
     <CategoryView

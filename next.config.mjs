@@ -7,6 +7,9 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
+    formats: ['image/webp', 'image/avif'],
+    minimumCacheTTL: 86400,
+    deviceSizes: [390, 768, 1080],
     remotePatterns: [
       {
         protocol: 'https',

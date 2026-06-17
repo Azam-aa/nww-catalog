@@ -7,6 +7,8 @@ import { useShareCart } from '../../context/ShareCartContext';
 import { formatPrice } from '../../utils/formatPrice';
 import { Bookmark, BookmarkCheck } from 'lucide-react';
 
+const BLUR_PLACEHOLDER = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiIHZpZXdCb3g9IjAgMCA4IDgiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMyZTJlMmEiLz48L3N2Zz4=';
+
 export function ProductCard({ product, onClick }) {
   const { isAdmin } = useAdmin();
   const { isInCart, toggleCart } = useShareCart();
@@ -37,6 +39,8 @@ export function ProductCard({ product, onClick }) {
         alt={displayTitle}
         fill
         sizes="(max-width: 480px) 50vw, (max-width: 768px) 33vw, 250px"
+        placeholder="blur"
+        blurDataURL={BLUR_PLACEHOLDER}
         className={`object-cover transition-all duration-300 ${
           isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
         }`}
